@@ -133,8 +133,8 @@
     .anim-delay-5 { animation-delay: 500ms; }
     .anim-delay-7 { animation-delay: 700ms; }
 
-    .reveal-on-scroll { opacity: 0; transform: translateY(30px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
-    .reveal-on-scroll.visible { opacity: 1; transform: translateY(0); }
+    .reveal-on-scroll { opacity: 1 !important; transform: none !important; transition: none !important; }
+    .reveal-on-scroll.visible { opacity: 1 !important; transform: none !important; }
 
     @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
     .float-anim { animation: float 6s ease-in-out infinite; }
@@ -232,6 +232,13 @@
     }
     .toast.show { transform: translateY(0); opacity: 1; }
 
+    @media (max-width: 768px) {
+      section { padding-top: 2rem; padding-bottom: 2rem; }
+      .glow-decoration { width: 520px; height: 340px; }
+      .grid-bg { background-size: 40px 40px; }
+      .reveal-on-scroll { transition: none !important; }
+    }
+
     /* Light mode adjustments */
     body.light-mode nav {
       background: rgba(255, 255, 255, 0.8) !important;
@@ -282,7 +289,7 @@
   </div>
 
   <!-- NAVBAR -->
-  <nav class="fixed top-0 left-0 right-0 z-50 h-16 flex items-center px-6 backdrop-blur-xl bg-black/50 border-b border-white/5">
+  <nav class="fixed inset-x-0 top-0 z-50 h-16 flex items-center px-4 sm:px-6 backdrop-blur-xl bg-black/90 border-b border-white/10 shadow-lg">
     <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
       <a href="#" class="flex items-center gap-2.5">
         <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
@@ -296,7 +303,7 @@
         <a href="#arquitectura" class="text-sm text-white/70 hover:text-white transition-colors">Arquitectura</a>
         <a href="#funcionamiento" class="text-sm text-white/70 hover:text-white transition-colors">Funcionamiento</a>
         <a href="#equipo" class="text-sm text-white/70 hover:text-white transition-colors">Equipo</a>
-        <button id="theme-toggle-btn" class="theme-toggle" title="Cambiar tema">
+        <button id="theme-toggle-btn" class="theme-toggle" title="Cambiar tema" aria-label="Cambiar tema">
           <span class="toggle-icon sun-icon">
             <span class="iconify" data-icon="mdi:white-balance-sunny" data-width="16"></span>
           </span>
@@ -305,7 +312,7 @@
           </span>
         </button>
       </div>
-      <button id="mobile-menu-btn" class="md:hidden text-white/70 hover:text-white transition-colors">
+      <button id="mobile-menu-btn" class="md:hidden text-white/70 hover:text-white transition-colors" aria-label="Abrir menú">
         <span class="iconify" data-icon="mdi:menu" data-width="24"></span>
       </button>
     </div>
@@ -326,13 +333,13 @@
         <span class="iconify" data-icon="mdi:moon-waning-crescent" data-width="20"></span>
       </span>
     </button>
-    <button id="mobile-menu-close" class="absolute top-5 right-6 text-white/70 hover:text-white">
+    <button id="mobile-menu-close" class="absolute top-5 right-6 text-white/70 hover:text-white" aria-label="Cerrar menú">
       <span class="iconify" data-icon="mdi:close" data-width="28"></span>
     </button>
   </div>
 
   <!-- HERO -->
-  <section class="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-20 overflow-hidden">
+  <section class="relative min-h-screen flex flex-col items-center justify-center px-6 pt-16 pb-16 sm:pt-20 sm:pb-20 overflow-hidden">
     <div class="glow-decoration top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
     <div class="grid-bg absolute inset-0"></div>
 
@@ -421,7 +428,7 @@
       </div>
 
       <!-- Stats row -->
-      <div class="reveal-on-scroll grid grid-cols-2 md:grid-cols-4 gap-6 mb-20">
+      <div class="reveal-on-scroll grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-20">
         <div class="text-center p-6 rounded-2xl bg-white/[0.02] border border-white/5">
           <div class="font-serif font-light text-4xl md:text-5xl tracking-tight text-emerald-400 mb-2">50%</div>
           <p class="text-xs text-white/50 uppercase tracking-wide">Deserción en educación superior en Colombia</p>
@@ -1179,11 +1186,11 @@
     const nav = document.querySelector('nav');
     window.addEventListener('scroll', () => {
       if (window.scrollY > 50) {
-        nav.classList.add('bg-black/80');
-        nav.classList.remove('bg-black/50');
+        nav.classList.add('bg-black/95');
+        nav.classList.remove('bg-black/90');
       } else {
-        nav.classList.remove('bg-black/80');
-        nav.classList.add('bg-black/50');
+        nav.classList.remove('bg-black/95');
+        nav.classList.add('bg-black/90');
       }
     });
   </script>
