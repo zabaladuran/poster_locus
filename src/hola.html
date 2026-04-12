@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Locus — Gestión Inteligente de Asistencias | UDI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400..800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Newsreader', 'serif'],
+          },
+          colors: {
+            udi: {
+              yellow: '#F5A623',
+              'yellow-light': '#FBBF24',
+              'yellow-dark': '#D4890A',
+              blue: '#1E40AF',
+              'blue-mid': '#2563EB',
+              'blue-light': '#3B82F6',
+              'blue-pale': '#60A5FA',
+              'blue-dark': '#1E3A5F',
+              'blue-deep': '#0F1D3A',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Tema oscuro (por defecto) */
+    body { background: #020202; color: #ffffff; font-family: 'Inter', sans-serif; transition: background 0.4s, color 0.4s; }
+    body.light-mode { background: #f5f5f5; color: #1a1a1a; }
+    
+    ::selection { background: rgba(245, 166, 35, 0.3); color: #fff; }
+    body.light-mode ::selection { background: rgba(245, 166, 35, 0.2); color: #1a1a1a; }
+    
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #020202; }
+    body.light-mode ::-webkit-scrollbar-track { background: #f5f5f5; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+    body.light-mode ::-webkit-scrollbar-thumb { background: #D4890A; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #F5A623; }
+
+    /* Theme toggle */
+    #theme-toggle-btn {
+      position: relative;
+      width: 60px;
+      height: 32px;
+      background: #333;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      padding: 0 4px;
+      transition: all 0.3s ease;
+    }
+    #theme-toggle-btn:hover {
+      background: #444;
+      border-color: rgba(255,255,255,0.2);
+    }
+    body.light-mode #theme-toggle-btn {
+      background: #e5e5e5;
+      border-color: rgba(0,0,0,0.1);
+    }
+    body.light-mode #theme-toggle-btn:hover {
+      background: #d5d5d5;
+      border-color: rgba(0,0,0,0.2);
+    }
+
+    .toggle-icon {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      transition: all 0.3s ease;
+      opacity: 1;
+    }
+    .sun-icon { left: 4px; }
+    .moon-icon { right: 4px; opacity: 0.5; }
+    body.light-mode .sun-icon { opacity: 0.5; }
+    body.light-mode .moon-icon { opacity: 1; }
+
+    @keyframes clip-reveal-up {
+      0% { clip-path: inset(100% 0 0 0); transform: translateY(40px); }
+      100% { clip-path: inset(0 0 0 0); transform: translateY(0); }
+    }
+    .anim-reveal { animation: clip-reveal-up 1.2s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .anim-delay-1 { animation-delay: 100ms; }
+    .anim-delay-2 { animation-delay: 200ms; }
+    .anim-delay-3 { animation-delay: 300ms; }
+    .anim-delay-5 { animation-delay: 500ms; }
+    .anim-delay-7 { animation-delay: 700ms; }
+
+    .reveal-on-scroll { opacity: 0; transform: translateY(30px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+    .reveal-on-scroll.visible { opacity: 1; transform: translateY(0); }
+
+    @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
+    .float-anim { animation: float 6s ease-in-out infinite; }
+
+    @keyframes pulse-ring {
+      0% { transform: scale(0.8); opacity: 0.6; }
+      50% { transform: scale(1.2); opacity: 0; }
+      100% { transform: scale(0.8); opacity: 0; }
+    }
+    .pulse-ring { animation: pulse-ring 2s ease-out infinite; }
+
+    @keyframes scan-line {
+      0% { top: 0%; }
+      50% { top: 90%; }
+      100% { top: 0%; }
+    }
+    .scan-line { animation: scan-line 3s ease-in-out infinite; }
+
+    .text-gradient {
+      background: linear-gradient(180deg, #FFFFFF 0%, rgba(255,255,255,0.6) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    body.light-mode .text-gradient {
+      background: linear-gradient(180deg, #1a1a1a 0%, rgba(26,26,26,0.7) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .text-gradient-udi {
+      background: linear-gradient(135deg, #F5A623 0%, #FBBF24 50%, #FDE68A 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    body.light-mode .text-gradient-udi {
+      background: linear-gradient(135deg, #D4890A 0%, #B8730A 50%, #8B5A00 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .text-gradient-blue {
+      background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #60A5FA 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    body.light-mode .text-gradient-blue {
+      background: linear-gradient(135deg, #1E40AF 0%, #1E40AF 50%, #2563EB 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .border-gradient {
+      border: 1px solid transparent;
+      background-image: linear-gradient(#050505, #050505), linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+    }
+    body.light-mode .border-gradient {
+      border: 1px solid transparent;
+      background-image: linear-gradient(#f0f0f0, #f0f0f0), linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.02) 100%);
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+    }
+
+    .border-gradient:hover {
+      background-image: linear-gradient(#080808, #080808), linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%);
+      background-clip: padding-box, border-box;
+    }
+    body.light-mode .border-gradient:hover {
+      background-image: linear-gradient(#e5e5e5, #e5e5e5), linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.04) 100%);
+      background-clip: padding-box, border-box;
+    }
+
+    .glow-yellow {
+      position: absolute;
+      width: 1000px;
+      height: 600px;
+      background: rgba(245, 166, 35, 0.025);
+      filter: blur(100px);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    body.light-mode .glow-yellow {
+      background: rgba(245, 166, 35, 0.08);
+    }
+
+    .glow-blue {
+      position: absolute;
+      width: 1000px;
+      height: 600px;
+      background: rgba(37, 99, 235, 0.02);
+      filter: blur(100px);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    body.light-mode .glow-blue {
+      background: rgba(37, 99, 235, 0.06);
+    }
+
+    .flow-line {
+      background: linear-gradient(180deg, transparent, rgba(245, 166, 35, 0.15), transparent);
+    }
+    body.light-mode .flow-line {
+      background: linear-gradient(180deg, transparent, rgba(212, 137, 10, 0.2), transparent);
+    }
+
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(37, 99, 235, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(37, 99, 235, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+      -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+    }
+    body.light-mode .grid-bg {
+      background-image:
+        linear-gradient(rgba(30, 58, 95, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(30, 58, 95, 0.08) 1px, transparent 1px);
+    }
+
+    .udi-stripe {
+      background: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 10px,
+        rgba(245, 166, 35, 0.015) 10px,
+        rgba(245, 166, 35, 0.015) 20px
+      );
+    }
+
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 100;
+      padding: 1rem 1.5rem; border-radius: 1rem;
+      background: rgba(245, 166, 35, 0.12); border: 1px solid rgba(245, 166, 35, 0.3);
+      backdrop-filter: blur(12px);
+      transform: translateY(120%); opacity: 0;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    .logo-udi-block {
+      width: 12px; height: 12px; background: #F5A623; border-radius: 2px; display: inline-block;
+    }
+    body.light-mode .logo-udi-block {
+      background: #D4890A;
+    }
+
+    /* Light mode adjustments */
+    body.light-mode nav {
+      background: rgba(255, 255, 255, 0.8) !important;
+      border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+    }
+
+    body.light-mode nav a {
+      color: rgba(0, 0, 0, 0.7) !important;
+    }
+
+    body.light-mode nav a:hover {
+      color: rgba(0, 0, 0, 0.95) !important;
+    }
+
+    body.light-mode .toast {
+      background: rgba(245, 166, 35, 0.1);
+      border-color: rgba(245, 166, 35, 0.25);
+    }
+
+    body.light-mode #mobile-menu {
+      background: rgba(255, 255, 255, 0.95) !important;
+    }
+
+    body.light-mode #mobile-menu a {
+      color: rgba(0, 0, 0, 0.8) !important;
+    }
+
+    body.light-mode h1, body.light-mode h2, body.light-mode h3, body.light-mode h4, body.light-mode h5, body.light-mode h6 {
+      color: #1a1a1a;
+    }
+
+    body.light-mode p, body.light-mode span {
+      color: #333;
+    }
+
+    body.light-mode .bg-white\/\[0\.02\], body.light-mode [class*="bg-white/"], body.light-mode [class*="border-white/"] {
+      background-color: rgba(0, 0, 0, 0.04) !important;
+      border-color: rgba(0, 0, 0, 0.1) !important;
+    }
+  </style>
+</head>
+<body class="overflow-x-hidden">
+
+  <!-- Toast -->
+  <div id="toast" class="toast flex items-center gap-3">
+    <span class="iconify text-udi-yellow" data-icon="mdi:check-circle" data-width="20"></span>
+    <span id="toast-msg" class="text-sm text-udi-yellow-light"></span>
+  </div>
+
+  <!-- NAVBAR -->
+  <nav class="fixed top-0 left-0 right-0 z-50 h-16 flex items-center px-6 backdrop-blur-xl bg-black/50 border-b border-white/5">
+    <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
+      <a href="#" class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5">
+          <div class="w-7 h-7 rounded-md bg-udi-blue/80 flex items-center justify-center">
+            <span class="iconify text-white" data-icon="mdi:map-marker-radius" data-width="15"></span>
+          </div>
+          <div class="logo-udi-block" style="width:4px; height:20px; border-radius:1px;"></div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="font-semibold text-white tracking-tight">Locus</span>
+          <span class="hidden sm:inline text-[10px] font-bold tracking-widest text-udi-blue-light/50">UDI</span>
+        </div>
+      </a>
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#problema" class="text-sm text-white/70 hover:text-udi-yellow transition-colors">Problema</a>
+        <a href="#solucion" class="text-sm text-white/70 hover:text-udi-yellow transition-colors">Solución</a>
+        <a href="#arquitectura" class="text-sm text-white/70 hover:text-udi-yellow transition-colors">Arquitectura</a>
+        <a href="#funcionamiento" class="text-sm text-white/70 hover:text-udi-yellow transition-colors">Funcionamiento</a>
+        <a href="#equipo" class="text-sm text-white/70 hover:text-udi-yellow transition-colors">Equipo</a>
+        <button id="theme-toggle-btn" class="theme-toggle" title="Cambiar tema">
+          <span class="toggle-icon sun-icon">
+            <span class="iconify" data-icon="mdi:white-balance-sunny" data-width="16"></span>
+          </span>
+          <span class="toggle-icon moon-icon">
+            <span class="iconify" data-icon="mdi:moon-waning-crescent" data-width="16"></span>
+          </span>
+        </button>
+      </div>
+      <button id="mobile-menu-btn" class="md:hidden text-white/70 hover:text-white transition-colors">
+        <span class="iconify" data-icon="mdi:menu" data-width="24"></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="fixed inset-0 z-40 bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center gap-8 opacity-0 pointer-events-none transition-opacity duration-500">
+    <a href="#problema" class="text-2xl text-white/80 hover:text-udi-yellow transition-colors mobile-link">Problema</a>
+    <a href="#solucion" class="text-2xl text-white/80 hover:text-udi-yellow transition-colors mobile-link">Solución</a>
+    <a href="#arquitectura" class="text-2xl text-white/80 hover:text-udi-yellow transition-colors mobile-link">Arquitectura</a>
+    <a href="#funcionamiento" class="text-2xl text-white/80 hover:text-udi-yellow transition-colors mobile-link">Funcionamiento</a>
+    <a href="#equipo" class="text-2xl text-white/80 hover:text-udi-yellow transition-colors mobile-link">Equipo</a>
+    <button id="mobile-menu-close" class="absolute top-5 right-6 text-white/70 hover:text-white">
+      <span class="iconify" data-icon="mdi:close" data-width="28"></span>
+    </button>
+  </div>
+
+  <!-- HERO -->
+  <section class="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-20 overflow-hidden">
+    <div class="glow-yellow top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+    <div class="glow-blue bottom-0 left-1/4 -translate-x-1/2"></div>
+    <div class="grid-bg absolute inset-0"></div>
+
+    <div class="relative z-10 text-center max-w-5xl mx-auto">
+      <!-- Badge -->
+      <div class="anim-reveal anim-delay-1 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-udi-yellow/10 border border-udi-yellow/20 mb-8">
+        <span class="w-2 h-2 rounded-full bg-udi-yellow" style="box-shadow: 0 0 10px rgba(245,166,35,0.5);"></span>
+        <span class="text-xs font-medium uppercase tracking-wide text-udi-yellow-light">Semillero de Ingeniería de Sistemas — UDI</span>
+      </div>
+
+      <!-- Title -->
+      <h1 class="anim-reveal anim-delay-2 font-serif font-light text-5xl md:text-7xl lg:text-8xl tracking-tighter leading-[1.05] mb-8">
+        <span class="text-gradient">Asistencia</span><br>
+        <span class="text-gradient">verificada con</span><br>
+        <span class="text-gradient-udi">ubicación real</span>
+      </h1>
+
+      <!-- Subtitle -->
+      <p class="anim-reveal anim-delay-3 text-base md:text-xl text-white/70 max-w-2xl mx-auto mb-12 leading-relaxed">
+        Locus elimina el pase de lista manual en semilleros de investigación mediante códigos QR temporales y validación geográfica que garantiza la presencia física en el aula.
+      </p>
+
+      <!-- CTAs -->
+      <div class="anim-reveal anim-delay-5 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="#solucion" class="group inline-flex items-center gap-2 px-8 py-4 bg-udi-yellow text-black text-sm font-semibold rounded-full hover:bg-udi-yellow-light transition-all duration-300" style="box-shadow: 0 0 30px -5px rgba(245,166,35,0.5);">
+          Conocer la solución
+          <span class="iconify group-hover:translate-x-0.5 transition-transform" data-icon="mdi:arrow-down" data-width="16"></span>
+        </a>
+        <a href="#arquitectura" class="inline-flex items-center gap-2 px-8 py-4 rounded-full border border-udi-blue-light/30 text-sm font-medium text-udi-blue-pale hover:bg-udi-blue/10 hover:border-udi-blue-light/50 transition-all duration-300">
+          Ver arquitectura
+        </a>
+      </div>
+    </div>
+
+    <!-- Hero Visual -->
+    <div class="anim-reveal anim-delay-7 relative mt-16 md:mt-24 w-full max-w-lg mx-auto">
+      <div class="relative aspect-square max-w-xs mx-auto float-anim">
+        <!-- Outer rings -->
+        <div class="absolute inset-0 rounded-full border border-udi-blue-light/10"></div>
+        <div class="absolute inset-4 rounded-full border border-udi-yellow/15"></div>
+        <div class="absolute inset-8 rounded-full border border-udi-yellow/20 pulse-ring"></div>
+        <div class="absolute inset-8 rounded-full border border-udi-yellow/20"></div>
+
+        <!-- Center QR -->
+        <div class="absolute inset-12 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm flex items-center justify-center overflow-hidden">
+          <div class="scan-line absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-udi-yellow to-transparent"></div>
+          <div class="grid grid-cols-7 gap-1 p-4 opacity-60">
+            <div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-transparent"></div><div class="w-3 h-3 bg-white/40 rounded-sm"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div>
+            <div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-transparent"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-transparent"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-transparent"></div>
+            <div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-transparent"></div><div class="w-3 h-3 bg-white/40 rounded-sm"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div>
+            <div class="w-3 h-3 bg-transparent"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-transparent"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-transparent"></div><div class="w-3 h-3 bg-white/40 rounded-sm"></div>
+            <div class="w-3 h-3 bg-white/40 rounded-sm"></div><div class="w-3 h-3 bg-transparent"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-transparent"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div>
+            <div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-transparent"></div><div class="w-3 h-3 bg-white/40 rounded-sm"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-transparent"></div>
+            <div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-transparent"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div><div class="w-3 h-3 bg-white/40 rounded-sm"></div><div class="w-3 h-3 bg-transparent"></div><div class="w-3 h-3 bg-white/80 rounded-sm"></div>
+          </div>
+        </div>
+
+        <!-- Location pin -->
+        <div class="absolute -top-2 right-8 w-10 h-10 rounded-full bg-udi-yellow/20 border border-udi-yellow/30 flex items-center justify-center">
+          <span class="iconify text-udi-yellow" data-icon="mdi:map-marker" data-width="20"></span>
+        </div>
+
+        <!-- Shield -->
+        <div class="absolute -bottom-2 left-8 w-10 h-10 rounded-full bg-udi-blue-mid/20 border border-udi-blue-mid/30 flex items-center justify-center">
+          <span class="iconify text-udi-blue-light" data-icon="mdi:shield-check" data-width="20"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40">
+      <span class="text-xs tracking-widest uppercase">Scroll</span>
+      <span class="iconify animate-bounce" data-icon="mdi:chevron-down" data-width="20"></span>
+    </div>
+  </section>
+
+  <!-- PROBLEMA -->
+  <section id="problema" class="relative py-32 px-6">
+    <div class="max-w-7xl mx-auto">
+      <div class="reveal-on-scroll text-center mb-20">
+        <span class="inline-block text-xs font-medium uppercase tracking-wide text-udi-yellow mb-4">El problema</span>
+        <h2 class="font-serif font-light text-3xl md:text-5xl tracking-tight text-gradient mb-6">El pase de lista manual<br>ya no es suficiente</h2>
+        <p class="text-white/70 max-w-2xl mx-auto leading-relaxed">
+          En los semilleros de investigación de Barrancabermeja, el registro manual de asistencias genera errores, permite el fraude y consume tiempo valioso que debería destinarse a la formación investigativa.
+        </p>
+      </div>
+
+      <!-- Stats -->
+      <div class="reveal-on-scroll grid grid-cols-2 md:grid-cols-4 gap-6 mb-20">
+        <div class="text-center p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+          <div class="font-serif font-light text-4xl md:text-5xl tracking-tight text-udi-yellow mb-2">50%</div>
+          <p class="text-xs text-white/50 uppercase tracking-wide">Deserción en educación superior en Colombia</p>
+        </div>
+        <div class="text-center p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+          <div class="font-serif font-light text-4xl md:text-5xl tracking-tight text-udi-blue-light mb-2">80%</div>
+          <p class="text-xs text-white/50 uppercase tracking-wide">En algunos departamentos supera este índice</p>
+        </div>
+        <div class="text-center p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+          <div class="font-serif font-light text-4xl md:text-5xl tracking-tight text-white mb-2">~8min</div>
+          <p class="text-xs text-white/50 uppercase tracking-wide">Tiempo promedio perdido por pase de lista</p>
+        </div>
+        <div class="text-center p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+          <div class="font-serif font-light text-4xl md:text-5xl tracking-tight text-red-400 mb-2">Alto</div>
+          <p class="text-xs text-white/50 uppercase tracking-wide">Riesgo de buddy signing (firma por otro)</p>
+        </div>
+      </div>
+
+      <!-- Problem cards -->
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="reveal-on-scroll border-gradient rounded-3xl p-8 transition-all duration-500">
+          <div class="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center mb-6">
+            <span class="iconify text-red-400" data-icon="mdi:close-circle-outline" data-width="24"></span>
+          </div>
+          <h3 class="text-lg font-medium mb-3">Errores humanos frecuentes</h3>
+          <p class="text-sm text-white/60 leading-relaxed">Olvidos en el marcado, pérdida de hojas de asistencia, transcripciones incorrectas que comprometen la calidad de los registros académicos.</p>
+        </div>
+        <div class="reveal-on-scroll border-gradient rounded-3xl p-8 transition-all duration-500" style="transition-delay: 100ms;">
+          <div class="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center mb-6">
+            <span class="iconify text-red-400" data-icon="mdi:account-alert" data-width="24"></span>
+          </div>
+          <h3 class="text-lg font-medium mb-3">Suplantación de identidad</h3>
+          <p class="text-sm text-white/60 leading-relaxed">La práctica del <em>buddy signing</em> —firmar por un compañero ausente— distorsiona la medición real de participación y afecta la integridad del proceso.</p>
+        </div>
+        <div class="reveal-on-scroll border-gradient rounded-3xl p-8 transition-all duration-500" style="transition-delay: 200ms;">
+          <div class="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center mb-6">
+            <span class="iconify text-red-400" data-icon="mdi:clock-alert-outline" data-width="24"></span>
+          </div>
+          <h3 class="text-lg font-medium mb-3">Pérdida de tiempo educativo</h3>
+          <p class="text-sm text-white/60 leading-relaxed">El registro manual interrumpe las clases, desvía el enfoque de las actividades investigativas y genera costos ocultos en tiempo y recursos administrativos.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOLUCIÓN -->
+  <section id="solucion" class="relative py-32 px-6 udi-stripe">
+    <div class="glow-yellow top-1/2 right-0 translate-x-1/4 -translate-y-1/2"></div>
+    <div class="max-w-7xl mx-auto relative z-10">
+      <div class="reveal-on-scroll text-center mb-20">
+        <span class="inline-block text-xs font-medium uppercase tracking-wide text-udi-yellow mb-4">La solución</span>
+        <h2 class="font-serif font-light text-3xl md:text-5xl tracking-tight text-gradient mb-6">Locus: asistencia inteligente<br>con verificación real</h2>
+        <p class="text-white/70 max-w-2xl mx-auto leading-relaxed">
+          Un sistema web que integra códigos QR temporales con validación de ubicación GPS o red universitaria, diseñado específicamente para los semilleros de investigación de la UDI.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6 mb-16">
+        <div class="reveal-on-scroll border-gradient rounded-3xl p-8 md:p-10 transition-all duration-500 group">
+          <div class="flex items-start gap-5">
+            <div class="w-14 h-14 shrink-0 rounded-2xl bg-udi-yellow/10 border border-udi-yellow/20 flex items-center justify-center group-hover:bg-udi-yellow/15 transition-colors duration-500">
+              <span class="iconify text-udi-yellow" data-icon="mdi:qrcode-scan" data-width="28"></span>
+            </div>
+            <div>
+              <h3 class="text-xl font-medium mb-3">Códigos QR temporales</h3>
+              <p class="text-sm text-white/60 leading-relaxed mb-4">El docente genera un código QR único por sesión que expira automáticamente. Cada código está vinculado a la actividad, el grupo y la ubicación autorizada.</p>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 rounded-full bg-udi-yellow/10 text-xs text-udi-yellow-light">Temporal</span>
+                <span class="px-3 py-1 rounded-full bg-udi-yellow/10 text-xs text-udi-yellow-light">Georreferenciado</span>
+                <span class="px-3 py-1 rounded-full bg-udi-yellow/10 text-xs text-udi-yellow-light">Único por sesión</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="reveal-on-scroll border-gradient rounded-3xl p-8 md:p-10 transition-all duration-500 group" style="transition-delay: 100ms;">
+          <div class="flex items-start gap-5">
+            <div class="w-14 h-14 shrink-0 rounded-2xl bg-udi-blue-mid/10 border border-udi-blue-mid/20 flex items-center justify-center group-hover:bg-udi-blue-mid/15 transition-colors duration-500">
+              <span class="iconify text-udi-blue-light" data-icon="mdi:map-marker-radius-outline" data-width="28"></span>
+            </div>
+            <div>
+              <h3 class="text-xl font-medium mb-3">Validación por geocerca</h3>
+              <p class="text-sm text-white/60 leading-relaxed mb-4">El sistema verifica que el dispositivo del estudiante se encuentre dentro del perímetro físico autorizado usando las coordenadas GPS comparadas con la geocerca definida.</p>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 rounded-full bg-udi-blue-mid/10 text-xs text-udi-blue-pale">GPS</span>
+                <span class="px-3 py-1 rounded-full bg-udi-blue-mid/10 text-xs text-udi-blue-pale">Geofencing</span>
+                <span class="px-3 py-1 rounded-full bg-udi-blue-mid/10 text-xs text-udi-blue-pale">Precisión métrica</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="reveal-on-scroll border-gradient rounded-3xl p-8 md:p-10 transition-all duration-500 group" style="transition-delay: 200ms;">
+          <div class="flex items-start gap-5">
+            <div class="w-14 h-14 shrink-0 rounded-2xl bg-udi-blue-mid/10 border border-udi-blue-mid/20 flex items-center justify-center group-hover:bg-udi-blue-mid/15 transition-colors duration-500">
+              <span class="iconify text-udi-blue-light" data-icon="mdi:wifi-lock" data-width="28"></span>
+            </div>
+            <div>
+              <h3 class="text-xl font-medium mb-3">Verificación por red institucional</h3>
+              <p class="text-sm text-white/60 leading-relaxed mb-4">Como método complementario, el sistema valida si el dispositivo está conectado a la red Wi-Fi de la UDI mediante SSID e IP, reforzando la prueba de presencialidad.</p>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 rounded-full bg-udi-blue-mid/10 text-xs text-udi-blue-pale">SSID</span>
+                <span class="px-3 py-1 rounded-full bg-udi-blue-mid/10 text-xs text-udi-blue-pale">IP Validation</span>
+                <span class="px-3 py-1 rounded-full bg-udi-blue-mid/10 text-xs text-udi-blue-pale">Complementario</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="reveal-on-scroll border-gradient rounded-3xl p-8 md:p-10 transition-all duration-500 group" style="transition-delay: 300ms;">
+          <div class="flex items-start gap-5">
+            <div class="w-14 h-14 shrink-0 rounded-2xl bg-udi-yellow/10 border border-udi-yellow/20 flex items-center justify-center group-hover:bg-udi-yellow/15 transition-colors duration-500">
+              <span class="iconify text-udi-yellow" data-icon="mdi:chart-timeline-variant-shimmer" data-width="28"></span>
+            </div>
+            <div>
+              <h3 class="text-xl font-medium mb-3">Reportes y trazabilidad</h3>
+              <p class="text-sm text-white/60 leading-relaxed mb-4">Registros auditables y en tiempo real con historial completo. Los docentes pueden consultar, filtrar y exportar datos para uso académico-administrativo.</p>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 rounded-full bg-udi-yellow/10 text-xs text-udi-yellow-light">Auditable</span>
+                <span class="px-3 py-1 rounded-full bg-udi-yellow/10 text-xs text-udi-yellow-light">Exportable</span>
+                <span class="px-3 py-1 rounded-full bg-udi-yellow/10 text-xs text-udi-yellow-light">Tiempo real</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Before vs After -->
+      <div class="reveal-on-scroll border-gradient rounded-3xl p-8 md:p-12">
+        <h3 class="font-serif font-light text-2xl md:text-3xl tracking-tight text-gradient mb-8 text-center">Antes vs. Después</h3>
+        <div class="grid md:grid-cols-2 gap-8">
+          <div>
+            <div class="flex items-center gap-2 mb-6">
+              <span class="iconify text-red-400" data-icon="mdi:close" data-width="18"></span>
+              <span class="text-sm font-medium text-red-400 uppercase tracking-wide">Método manual</span>
+            </div>
+            <ul class="space-y-4">
+              <li class="flex items-start gap-3 text-sm text-white/50"><span class="iconify mt-0.5 shrink-0" data-icon="mdi:minus" data-width="16"></span>Hojas de papel que se pierden o dañan</li>
+              <li class="flex items-start gap-3 text-sm text-white/50"><span class="iconify mt-0.5 shrink-0" data-icon="mdi:minus" data-width="16"></span>Firmas falsas sin verificación posible</li>
+              <li class="flex items-start gap-3 text-sm text-white/50"><span class="iconify mt-0.5 shrink-0" data-icon="mdi:minus" data-width="16"></span>Transcripción manual a sistemas digitales</li>
+              <li class="flex items-start gap-3 text-sm text-white/50"><span class="iconify mt-0.5 shrink-0" data-icon="mdi:minus" data-width="16"></span>No hay trazabilidad ni auditoría confiable</li>
+              <li class="flex items-start gap-3 text-sm text-white/50"><span class="iconify mt-0.5 shrink-0" data-icon="mdi:minus" data-width="16"></span>Interrumpe el tiempo de clase</li>
+            </ul>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 mb-6">
+              <span class="iconify text-udi-yellow" data-icon="mdi:check" data-width="18"></span>
+              <span class="text-sm font-medium text-udi-yellow uppercase tracking-wide">Con Locus</span>
+            </div>
+            <ul class="space-y-4">
+              <li class="flex items-start gap-3 text-sm text-white/70"><span class="iconify mt-0.5 shrink-0 text-udi-yellow" data-icon="mdi:check" data-width="16"></span>Registros digitales automáticos y persistentes</li>
+              <li class="flex items-start gap-3 text-sm text-white/70"><span class="iconify mt-0.5 shrink-0 text-udi-yellow" data-icon="mdi:check" data-width="16"></span>Verificación de ubicación que elimina el fraude</li>
+              <li class="flex items-start gap-3 text-sm text-white/70"><span class="iconify mt-0.5 shrink-0 text-udi-yellow" data-icon="mdi:check" data-width="16"></span>Datos en tiempo real, sin transcripción</li>
+              <li class="flex items-start gap-3 text-sm text-white/70"><span class="iconify mt-0.5 shrink-0 text-udi-yellow" data-icon="mdi:check" data-width="16"></span>Historial completo auditable y exportable</li>
+              <li class="flex items-start gap-3 text-sm text-white/70"><span class="iconify mt-0.5 shrink-0 text-udi-yellow" data-icon="mdi:check" data-width="16"></span>Proceso de < 5 segundos por estudiante</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARQUITECTURA -->
+  <section id="arquitectura" class="relative py-32 px-6">
+    <div class="glow-blue top-1/3 left-0 -translate-x-1/4"></div>
+    <div class="max-w-7xl mx-auto relative z-10">
+      <div class="reveal-on-scroll text-center mb-20">
+        <span class="inline-block text-xs font-medium uppercase tracking-wide text-udi-blue-light mb-4">Arquitectura</span>
+        <h2 class="font-serif font-light text-3xl md:text-5xl tracking-tight text-gradient mb-6">Tres capas, un flujo<br>claro y modular</h2>
+        <p class="text-white/70 max-w-2xl mx-auto leading-relaxed">
+          Locus adopta el patrón MVC con una arquitectura cliente-servidor de tres capas, diseñada para el desarrollo iterativo bajo la metodología XP.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6 mb-16">
+        <div class="reveal-on-scroll border-gradient rounded-3xl p-8 transition-all duration-500 relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-udi-yellow/30 to-transparent"></div>
+          <div class="text-xs font-medium uppercase tracking-wide text-udi-yellow mb-2">Capa 1</div>
+          <h3 class="text-xl font-medium mb-4">Presentación</h3>
+          <p class="text-sm text-white/60 leading-relaxed mb-6">Interfaces web responsivas accesibles desde cualquier navegador moderno en móviles y escritorio.</p>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center"><span class="iconify text-white/50" data-icon="mdi:language-html5" data-width="16"></span></div><span class="text-sm text-white/50">HTML</span></div>
+            <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center"><span class="iconify text-white/50" data-icon="mdi:language-css3" data-width="16"></span></div><span class="text-sm text-white/50">CSS</span></div>
+            <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center"><span class="iconify text-white/50" data-icon="mdi:language-javascript" data-width="16"></span></div><span class="text-sm text-white/50">JavaScript</span></div>
+          </div>
+        </div>
+
+        <div class="reveal-on-scroll border-gradient rounded-3xl p-8 transition-all duration-500 relative overflow-hidden" style="transition-delay: 100ms;">
+          <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-udi-blue-light/50 to-transparent"></div>
+          <div class="text-xs font-medium uppercase tracking-wide text-udi-blue-light mb-2">Capa 2</div>
+          <h3 class="text-xl font-medium mb-4">Lógica de negocio</h3>
+          <p class="text-sm text-white/60 leading-relaxed mb-6">Procesamiento de solicitudes, generación de QR, validación geográfica y verificación de red institucional.</p>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center"><span class="iconify text-white/50" data-icon="mdi:language-php" data-width="16"></span></div><span class="text-sm text-white/50">PHP</span></div>
+            <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center"><span class="iconify text-white/50" data-icon="mdi:api" data-width="16"></span></div><span class="text-sm text-white/50">API RESTful</span></div>
+            <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center"><span class="iconify text-white/50" data-icon="mdi:test-tube" data-width="16"></span></div><span class="text-sm text-white/50">PHPUnit</span></div>
+          </div>
+        </div>
+
+        <div class="reveal-on-scroll border-gradient rounded-3xl p-8 transition-all duration-500 relative overflow-hidden" style="transition-delay: 200ms;">
+          <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-udi-yellow/30 to-transparent"></div>
+          <div class="text-xs font-medium uppercase tracking-wide text-udi-yellow mb-2">Capa 3</div>
+          <h3 class="text-xl font-medium mb-4">Persistencia</h3>
+          <p class="text-sm text-white/60 leading-relaxed mb-6">Almacenamiento relacional de usuarios, sesiones, códigos QR y registros de asistencia con integridad garantizada.</p>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center"><span class="iconify text-white/50" data-icon="mdi:database" data-width="16"></span></div><span class="text-sm text-white/50">Base de datos relacional</span></div>
+            <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center"><span class="iconify text-white/50" data-icon="mdi:table-lock" data-width="16"></span></div><span class="text-sm text-white/50">Integridad referencial</span></div>
+            <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center"><span class="iconify text-white/50" data-icon="mdi:history" data-width="16"></span></div><span class="text-sm text-white/50">Trazabilidad completa</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MVC -->
+      <div class="reveal-on-scroll border-gradient rounded-3xl p-8 md:p-12">
+        <h3 class="font-serif font-light text-2xl md:text-3xl tracking-tight text-gradient mb-10 text-center">Patrón MVC</h3>
+        <div class="grid md:grid-cols-3 gap-6 items-center">
+          <div class="text-center p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+            <div class="w-16 h-16 rounded-2xl bg-udi-yellow/10 border border-udi-yellow/20 flex items-center justify-center mx-auto mb-4">
+              <span class="iconify text-udi-yellow" data-icon="mdi:database-outline" data-width="28"></span>
+            </div>
+            <h4 class="text-lg font-medium mb-2">Modelo</h4>
+            <p class="text-xs text-white/50 leading-relaxed">Entidades: Usuarios, Sesiones, Códigos QR, Registros</p>
+          </div>
+          <div class="text-center p-6 rounded-2xl bg-white/[0.02] border border-udi-blue-mid/10 relative">
+            <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-udi-blue-mid/10 border border-udi-blue-mid/20 text-[10px] font-medium uppercase tracking-wider text-udi-blue-pale">Núcleo</div>
+            <div class="w-16 h-16 rounded-2xl bg-udi-blue-mid/10 border border-udi-blue-mid/20 flex items-center justify-center mx-auto mb-4">
+              <span class="iconify text-udi-blue-light" data-icon="mdi:cog-outline" data-width="28"></span>
+            </div>
+            <h4 class="text-lg font-medium mb-2">Controlador</h4>
+            <p class="text-xs text-white/50 leading-relaxed">Validación de geocerca, SSID/IP, lógica de registro</p>
+          </div>
+          <div class="text-center p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+            <div class="w-16 h-16 rounded-2xl bg-udi-yellow/10 border border-udi-yellow/20 flex items-center justify-center mx-auto mb-4">
+              <span class="iconify text-udi-yellow" data-icon="mdi:monitor-cellphone" data-width="28"></span>
+            </div>
+            <h4 class="text-lg font-medium mb-2">Vista</h4>
+            <p class="text-xs text-white/50 leading-relaxed">Paneles docente, escáner estudiante, reportes</p>
+          </div>
+        </div>
+        <div class="hidden md:flex justify-center mt-6 gap-4">
+          <div class="flex items-center gap-2 text-xs text-white/30">
+            <span>Vista</span><span class="iconify" data-icon="mdi:arrow-right" data-width="14"></span><span>Controlador</span><span class="iconify" data-icon="mdi:arrow-right" data-width="14"></span><span>Modelo</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FUNCIONAMIENTO -->
+  <section id="funcionamiento" class="relative py-32 px-6 udi-stripe">
+    <div class="glow-yellow bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2"></div>
+    <div class="max-w-7xl mx-auto relative z-10">
+      <div class="reveal-on-scroll text-center mb-20">
+        <span class="inline-block text-xs font-medium uppercase tracking-wide text-udi-yellow mb-4">Funcionamiento</span>
+        <h2 class="font-serif font-light text-3xl md:text-5xl tracking-tight text-gradient mb-6">Cuatro pasos,<br>cero complicaciones</h2>
+        <p class="text-white/70 max-w-2xl mx-auto leading-relaxed">
+          El flujo de Locus está diseñado para que tanto docentes como estudiantes completen el proceso en segundos, sin curva de aprendizaje.
+        </p>
+      </div>
+
+      <div class="relative max-w-3xl mx-auto">
+        <div class="absolute left-8 md:left-10 top-0 bottom-0 w-px flow-line"></div>
+
+        <div class="reveal-on-scroll relative flex gap-6 md:gap-10 mb-16">
+          <div class="shrink-0 w-16 md:w-20 h-16 md:h-20 rounded-2xl bg-udi-yellow/10 border border-udi-yellow/20 flex items-center justify-center relative z-10">
+            <span class="font-serif font-light text-2xl text-udi-yellow">1</span>
+          </div>
+          <div class="pt-2 md:pt-3">
+            <h3 class="text-xl font-medium mb-2">Docente inicia sesión</h3>
+            <p class="text-sm text-white/60 leading-relaxed">El docente accede a la plataforma web, selecciona el semillero y la actividad académica, y crea una nueva sesión de asistencia. El sistema genera automáticamente un código QR temporal vinculado a la geocerca del aula.</p>
+            <div class="flex items-center gap-2 mt-3">
+              <span class="iconify text-udi-yellow/60" data-icon="mdi:laptop" data-width="16"></span>
+              <span class="text-xs text-white/40">Módulo docente — Web</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="reveal-on-scroll relative flex gap-6 md:gap-10 mb-16">
+          <div class="shrink-0 w-16 md:w-20 h-16 md:h-20 rounded-2xl bg-udi-blue-mid/10 border border-udi-blue-mid/20 flex items-center justify-center relative z-10">
+            <span class="font-serif font-light text-2xl text-udi-blue-light">2</span>
+          </div>
+          <div class="pt-2 md:pt-3">
+            <h3 class="text-xl font-medium mb-2">Estudiante escanea el QR</h3>
+            <p class="text-sm text-white/60 leading-relaxed">Desde su dispositivo móvil, el estudiante accede a Locus, escanea el código QR proyectado o mostrado por el docente. El sistema identifica automáticamente la sesión y solicita permisos de ubicación.</p>
+            <div class="flex items-center gap-2 mt-3">
+              <span class="iconify text-udi-blue-light/60" data-icon="mdi:cellphone" data-width="16"></span>
+              <span class="text-xs text-white/40">Módulo estudiante — Mobile web</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="reveal-on-scroll relative flex gap-6 md:gap-10 mb-16">
+          <div class="shrink-0 w-16 md:w-20 h-16 md:h-20 rounded-2xl bg-udi-yellow/10 border border-udi-yellow/20 flex items-center justify-center relative z-10">
+            <span class="font-serif font-light text-2xl text-udi-yellow">3</span>
+          </div>
+          <div class="pt-2 md:pt-3">
+            <h3 class="text-xl font-medium mb-2">Sistema verifica ubicación</h3>
+            <p class="text-sm text-white/60 leading-relaxed">Locus compara las coordenadas GPS del dispositivo con la geocerca definida para el aula, o verifica la conexión a la red Wi-Fi institucional (SSID/IP). Si ambas validaciones fallan, la asistencia se rechaza automáticamente.</p>
+            <div class="flex items-center gap-2 mt-3">
+              <span class="iconify text-udi-yellow/60" data-icon="mdi:shield-check-outline" data-width="16"></span>
+              <span class="text-xs text-white/40">Validación: GPS + Red institucional</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="reveal-on-scroll relative flex gap-6 md:gap-10">
+          <div class="shrink-0 w-16 md:w-20 h-16 md:h-20 rounded-2xl bg-udi-blue-mid/10 border border-udi-blue-mid/20 flex items-center justify-center relative z-10">
+            <span class="font-serif font-light text-2xl text-udi-blue-light">4</span>
+          </div>
+          <div class="pt-2 md:pt-3">
+            <h3 class="text-xl font-medium mb-2">Registro confirmado</h3>
+            <p class="text-sm text-white/60 leading-relaxed">Si la validación es exitosa, el sistema registra la asistencia con marca de tiempo, ubicación y datos del estudiante. El docente ve la actualización en tiempo real en su panel y puede consultar el reporte al finalizar.</p>
+            <div class="flex items-center gap-2 mt-3">
+              <span class="iconify text-udi-blue-light/60" data-icon="mdi:check-decagram" data-width="16"></span>
+              <span class="text-xs text-white/40">Registro auditable en tiempo real</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- METODOLOGÍA -->
+  <section class="relative py-32 px-6">
+    <div class="max-w-7xl mx-auto">
+      <div class="reveal-on-scroll text-center mb-16">
+        <span class="inline-block text-xs font-medium uppercase tracking-wide text-udi-blue-light mb-4">Metodología</span>
+        <h2 class="font-serif font-light text-3xl md:text-5xl tracking-tight text-gradient mb-6">Desarrollo con<br>Programación Extrema</h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+        <div class="reveal-on-scroll border-gradient rounded-3xl p-8 transition-all duration-500">
+          <div class="flex items-center gap-3 mb-6">
+            <span class="iconify text-udi-yellow" data-icon="mdi:infinity" data-width="24"></span>
+            <h3 class="text-lg font-medium">XP — Valores centrales</h3>
+          </div>
+          <ul class="space-y-4">
+            <li class="flex items-start gap-3 text-sm text-white/60"><span class="iconify mt-0.5 shrink-0 text-udi-yellow" data-icon="mdi:check-circle" data-width="16"></span><span><strong class="text-white/80">Comunicación:</strong> Retroalimentación constante entre el equipo y con los docentes de semillero</span></li>
+            <li class="flex items-start gap-3 text-sm text-white/60"><span class="iconify mt-0.5 shrink-0 text-udi-yellow" data-icon="mdi:check-circle" data-width="16"></span><span><strong class="text-white/80">Simplicidad:</strong> Diseñar solo lo necesario, evitar funcionalidades prematuras</span></li>
+            <li class="flex items-start gap-3 text-sm text-white/60"><span class="iconify mt-0.5 shrink-0 text-udi-yellow" data-icon="mdi:check-circle" data-width="16"></span><span><strong class="text-white/80">Retroalimentación:</strong> Iteraciones cortas con pruebas continuas del sistema</span></li>
+            <li class="flex items-start gap-3 text-sm text-white/60"><span class="iconify mt-0.5 shrink-0 text-udi-yellow" data-icon="mdi:check-circle" data-width="16"></span><span><strong class="text-white/80">Coraje:</strong> Refactorizar cuando sea necesario, no posponer mejoras técnicas</span></li>
+          </ul>
+        </div>
+
+        <div class="reveal-on-scroll border-gradient rounded-3xl p-8 transition-all duration-500" style="transition-delay: 100ms;">
+          <div class="flex items-center gap-3 mb-6">
+            <span class="iconify text-udi-blue-light" data-icon="mdi:test-tube" data-width="24"></span>
+            <h3 class="text-lg font-medium">Pruebas con PHPUnit</h3>
+          </div>
+          <ul class="space-y-4">
+            <li class="flex items-start gap-3 text-sm text-white/60"><span class="iconify mt-0.5 shrink-0 text-udi-blue-light" data-icon="mdi:check-circle" data-width="16"></span>Pruebas unitarias de cada componente del controlador</li>
+            <li class="flex items-start gap-3 text-sm text-white/60"><span class="iconify mt-0.5 shrink-0 text-udi-blue-light" data-icon="mdi:check-circle" data-width="16"></span>Validación de la lógica de geocerca y verificación SSID/IP</li>
+            <li class="flex items-start gap-3 text-sm text-white/60"><span class="iconify mt-0.5 shrink-0 text-udi-blue-light" data-icon="mdi:check-circle" data-width="16"></span>Verificación de resiliencia a fallos y casos límite</li>
+            <li class="flex items-start gap-3 text-sm text-white/60"><span class="iconify mt-0.5 shrink-0 text-udi-blue-light" data-icon="mdi:check-circle" data-width="16"></span>Cobertura que garantiza estabilidad ante cambios iterativos</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OBJETIVOS -->
+  <section class="relative py-32 px-6">
+    <div class="max-w-7xl mx-auto">
+      <div class="reveal-on-scroll text-center mb-16">
+        <span class="inline-block text-xs font-medium uppercase tracking-wide text-udi-yellow mb-4">Objetivos</span>
+        <h2 class="font-serif font-light text-3xl md:text-5xl tracking-tight text-gradient mb-6">Lo que buscamos lograr</h2>
+      </div>
+
+      <div class="max-w-3xl mx-auto">
+        <div class="reveal-on-scroll border-gradient rounded-3xl p-8 md:p-10 mb-6 relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-udi-yellow/40 to-transparent"></div>
+          <div class="text-xs font-medium uppercase tracking-wide text-udi-yellow mb-3">Objetivo General</div>
+          <p class="text-white/80 leading-relaxed">Desarrollar una aplicación web que integre códigos QR y verificación de ubicación para optimizar la toma de asistencias en semilleros de investigación con el fin de agilizar el proceso y restringir el marcado a entornos autorizados por medio de metodología XP.</p>
+        </div>
+
+        <div class="space-y-4">
+          <div class="reveal-on-scroll border-gradient rounded-2xl p-6 transition-all duration-500 flex items-start gap-4">
+            <div class="shrink-0 w-8 h-8 rounded-lg bg-udi-yellow/10 border border-udi-yellow/20 flex items-center justify-center"><span class="text-sm text-udi-yellow font-medium">1</span></div>
+            <p class="text-sm text-white/60 leading-relaxed pt-1">Identificar los requisitos funcionales y técnicos para la integración de geolocalización por GPS o el uso de la red universitaria en la aplicación.</p>
+          </div>
+          <div class="reveal-on-scroll border-gradient rounded-2xl p-6 transition-all duration-500 flex items-start gap-4" style="transition-delay: 100ms;">
+            <div class="shrink-0 w-8 h-8 rounded-lg bg-udi-blue-mid/10 border border-udi-blue-mid/20 flex items-center justify-center"><span class="text-sm text-udi-blue-light font-medium">2</span></div>
+            <p class="text-sm text-white/60 leading-relaxed pt-1">Diseñar un sistema de generación y escaneo de códigos QR que valide la presencia física en el aula.</p>
+          </div>
+          <div class="reveal-on-scroll border-gradient rounded-2xl p-6 transition-all duration-500 flex items-start gap-4" style="transition-delay: 200ms;">
+            <div class="shrink-0 w-8 h-8 rounded-lg bg-udi-yellow/10 border border-udi-yellow/20 flex items-center justify-center"><span class="text-sm text-udi-yellow font-medium">3</span></div>
+            <p class="text-sm text-white/60 leading-relaxed pt-1">Probar la aplicación por medio de pruebas unitarias usando PHPUnit, asegurando el correcto funcionamiento de sus componentes y su resiliencia a fallos.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ANTECEDENTES -->
+  <section class="relative py-32 px-6 udi-stripe">
+    <div class="max-w-7xl mx-auto">
+      <div class="reveal-on-scroll text-center mb-16">
+        <span class="inline-block text-xs font-medium uppercase tracking-wide text-udi-blue-light mb-4">Antecedentes</span>
+        <h2 class="font-serif font-light text-3xl md:text-5xl tracking-tight text-gradient mb-6">Evidencia internacional</h2>
+        <p class="text-white/70 max-w-2xl mx-auto leading-relaxed">La combinación de QR y geolocalización para control de asistencias ha sido validada en múltiples contextos educativos alrededor del mundo.</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div class="reveal-on-scroll border-gradient rounded-3xl p-8 transition-all duration-500">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="px-2 py-0.5 rounded bg-udi-yellow/10 text-[10px] font-medium text-udi-yellow-light">2018</span>
+            <span class="text-xs text-white/30">IJACSA</span>
+          </div>
+          <h3 class="text-sm font-medium mb-3 leading-snug">Ayop et al. — Sistema de asistencia con QR y GPS</h3>
+          <p class="text-xs text-white/50 leading-relaxed">Demostraron que la geolocalización reduce el riesgo de falsificación y aumenta la satisfacción de los usuarios por la automatización.</p>
+        </div>
+        <div class="reveal-on-scroll border-gradient rounded-3xl p-8 transition-all duration-500" style="transition-delay: 100ms;">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="px-2 py-0.5 rounded bg-udi-blue-mid/10 text-[10px] font-medium text-udi-blue-pale">2022</span>
+            <span class="text-xs text-white/30">Taibah Univ.</span>
+          </div>
+          <h3 class="text-sm font-medium mb-3 leading-snug">Abdellatif — QR vinculado a ubicación en educación médica</h3>
+          <p class="text-xs text-white/50 leading-relaxed">Alta aceptación como herramienta confiable, rápida y segura. Se resalta la importancia de integrar autenticación por red.</p>
+        </div>
+        <div class="reveal-on-scroll border-gradient rounded-3xl p-8 transition-all duration-500" style="transition-delay: 200ms;">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="px-2 py-0.5 rounded bg-udi-yellow/10 text-[10px] font-medium text-udi-yellow-light">2024</span>
+            <span class="text-xs text-white/30">COGITO Journal</span>
+          </div>
+          <h3 class="text-sm font-medium mb-3 leading-snug">Taju et al. — Implementación educativa QR + GPS</h3>
+          <p class="text-xs text-white/50 leading-relaxed">Ahorro significativo de tiempo vs. registro manual. Recomiendan iteración con retroalimentación constante del usuario final.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EQUIPO -->
+  <section id="equipo" class="relative py-32 px-6">
+    <div class="glow-yellow top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+    <div class="glow-blue bottom-0 right-0 translate-x-1/4 translate-y-1/4"></div>
+    <div class="max-w-7xl mx-auto relative z-10">
+      <div class="reveal-on-scroll text-center mb-16">
+        <span class="inline-block text-xs font-medium uppercase tracking-wide text-udi-blue-light mb-4">Equipo</span>
+        <h2 class="font-serif font-light text-3xl md:text-5xl tracking-tight text-gradient mb-6">Las personas detrás<br>de Locus</h2>
+        <p class="text-white/70 max-w-2xl mx-auto leading-relaxed">Estudiantes de Ingeniería de Sistemas del Semillero de Investigación de la UDI, bajo la dirección del docente Willhelmys Duran Botia.</p>
+      </div>
+
+      <div class="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+        <div class="reveal-on-scroll border-gradient rounded-3xl p-8 text-center transition-all duration-500 relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-udi-yellow/40 to-transparent"></div>
+          <div class="text-[10px] font-medium uppercase tracking-wide text-udi-yellow mb-6">Director</div>
+          <div class="w-20 h-20 rounded-full bg-udi-yellow/10 border border-udi-yellow/20 flex items-center justify-center mx-auto mb-4">
+            <span class="iconify text-udi-yellow/60" data-icon="mdi:account-tie" data-width="32"></span>
+          </div>
+          <h3 class="text-sm font-medium mb-1">Willhelmys Duran Botia</h3>
+          <p class="text-xs text-white/40">Docente director</p>
+        </div>
+
+        <div class="reveal-on-scroll border-gradient rounded-3xl p-8 text-center transition-all duration-500" style="transition-delay: 100ms;">
+          <div class="text-[10px] font-medium uppercase tracking-wide text-udi-blue-pale/50 mb-6">Investigador</div>
+          <div class="w-20 h-20 rounded-full bg-udi-blue-mid/10 border border-udi-blue-mid/15 flex items-center justify-center mx-auto mb-4">
+            <span class="iconify text-udi-blue-light/40" data-icon="mdi:account" data-width="32"></span>
+          </div>
+          <h3 class="text-sm font-medium mb-1">Jesús M. Farfán Uribe</h3>
+          <p class="text-xs text-white/40">Ing. de Sistemas</p>
+        </div>
+
+        <div class="reveal-on-scroll border-gradient rounded-3xl p-8 text-center transition-all duration-500" style="transition-delay: 200ms;">
+          <div class="text-[10px] font-medium uppercase tracking-wide text-udi-blue-pale/50 mb-6">Investigador</div>
+          <div class="w-20 h-20 rounded-full bg-udi-blue-mid/10 border border-udi-blue-mid/15 flex items-center justify-center mx-auto mb-4">
+            <span class="iconify text-udi-blue-light/40" data-icon="mdi:account" data-width="32"></span>
+          </div>
+          <h3 class="text-sm font-medium mb-1">Eduardo Monsalve Ariza</h3>
+          <p class="text-xs text-white/40">Ing. de Sistemas</p>
+        </div>
+
+        <div class="reveal-on-scroll border-gradient rounded-3xl p-8 text-center transition-all duration-500" style="transition-delay: 300ms;">
+          <div class="text-[10px] font-medium uppercase tracking-wide text-udi-blue-pale/50 mb-6">Investigador</div>
+          <div class="w-20 h-20 rounded-full bg-udi-blue-mid/10 border border-udi-blue-mid/15 flex items-center justify-center mx-auto mb-4">
+            <span class="iconify text-udi-blue-light/40" data-icon="mdi:account" data-width="32"></span>
+          </div>
+          <h3 class="text-sm font-medium mb-1">Ángel M. Quintero Durán</h3>
+          <p class="text-xs text-white/40">Ing. de Sistemas</p>
+        </div>
+      </div>
+
+      <!-- Institution -->
+      <div class="reveal-on-scroll mt-12 text-center">
+        <div class="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/[0.02] border border-white/5">
+          <div class="flex items-center gap-1">
+            <div class="w-6 h-6 rounded bg-udi-blue/80 flex items-center justify-center">
+              <span class="text-[8px] font-bold text-white">UDI</span>
+            </div>
+            <div class="logo-udi-block" style="width:3px; height:14px; border-radius:1px;"></div>
+          </div>
+          <span class="text-sm text-white/50">Universidad de Investigación y Desarrollo</span>
+          <span class="text-white/20">·</span>
+          <span class="text-sm text-white/50">Barrancabermeja</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="relative py-32 px-6">
+    <div class="glow-yellow top-0 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+    <div class="max-w-3xl mx-auto text-center relative z-10">
+      <div class="reveal-on-scroll">
+        <div class="w-16 h-16 rounded-2xl bg-udi-yellow/10 border border-udi-yellow/20 flex items-center justify-center mx-auto mb-8">
+          <span class="iconify text-udi-yellow" data-icon="mdi:map-marker-radius" data-width="32"></span>
+        </div>
+        <h2 class="font-serif font-light text-3xl md:text-5xl tracking-tight text-gradient mb-6">La ubicación es la clave<br>de la verificación real</h2>
+        <p class="text-white/70 max-w-xl mx-auto leading-relaxed mb-10">
+          Locus transforma el registro de asistencias de un proceso manual y vulnerable a uno automático, preciso y a prueba de fraudes — usando solo la tecnología que ya llevas en el bolsillo.
+        </p>
+
+        <form id="contact-form" class="max-w-md mx-auto text-left space-y-4">
+          <div>
+            <label class="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wide">Nombre</label>
+            <input type="text" required placeholder="Tu nombre completo" class="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-udi-yellow/30 transition-colors">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wide">Correo institucional</label>
+            <input type="email" required placeholder="nombre@udi.edu.co" class="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-udi-yellow/30 transition-colors">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wide">Mensaje</label>
+            <textarea required rows="3" placeholder="Cuéntanos tu interés en Locus..." class="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-udi-yellow/30 transition-colors resize-none"></textarea>
+          </div>
+          <button type="submit" class="w-full py-4 rounded-full bg-udi-yellow text-black text-sm font-semibold hover:bg-udi-yellow-light transition-all duration-300 flex items-center justify-center gap-2" style="box-shadow: 0 0 30px -5px rgba(245,166,35,0.5);">
+            Solicitar información
+            <span class="iconify" data-icon="mdi:send" data-width="16"></span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="relative py-16 px-6 border-t border-white/5">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1.5">
+            <div class="w-7 h-7 rounded-md bg-udi-blue/80 flex items-center justify-center">
+              <span class="iconify text-white" data-icon="mdi:map-marker-radius" data-width="15"></span>
+            </div>
+            <div class="logo-udi-block" style="width:4px; height:20px; border-radius:1px;"></div>
+          </div>
+          <span class="font-semibold tracking-tight">Locus</span>
+        </div>
+
+        <div class="flex items-center gap-3 text-xs text-white/30">
+          <span>Semillero de Ingeniería de Sistemas</span>
+          <span class="text-white/10">|</span>
+          <div class="flex items-center gap-1">
+            <div class="w-4 h-4 rounded bg-udi-blue/60 flex items-center justify-center">
+              <span class="text-[6px] font-bold text-white">UDI</span>
+            </div>
+            <span>Barrancabermeja</span>
+          </div>
+          <span class="text-white/10">|</span>
+          <span>2026</span>
+        </div>
+
+        <div class="flex items-center gap-1 text-xs text-white/30">
+          <span>IEEE/ISO/IEC 42010:2011</span>
+        </div>
+      </div>
+
+      <div class="mt-8 text-center">
+        <p class="text-[11px] text-white/20">Diseño de Arquitectura — Documento AD del Sistema Locus — Universidad de Investigación y Desarrollo</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+    document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
+
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileMenuClose = document.getElementById('mobile-menu-close');
+    const mobileLinks = document.querySelectorAll('.mobile-link');
+
+    function openMenu() {
+      mobileMenu.classList.remove('opacity-0', 'pointer-events-none');
+      mobileMenu.classList.add('opacity-100', 'pointer-events-auto');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMenu() {
+      mobileMenu.classList.add('opacity-0', 'pointer-events-none');
+      mobileMenu.classList.remove('opacity-100', 'pointer-events-auto');
+      document.body.style.overflow = '';
+    }
+    mobileMenuBtn.addEventListener('click', openMenu);
+    mobileMenuClose.addEventListener('click', closeMenu);
+    mobileLinks.forEach(link => link.addEventListener('click', closeMenu));
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3500);
+    }
+
+    document.getElementById('contact-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      showToast('¡Mensaje enviado! Te contactaremos pronto.');
+      this.reset();
+    });
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    const nav = document.querySelector('nav');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        nav.classList.add('bg-black/80');
+        nav.classList.remove('bg-black/50');
+      } else {
+        nav.classList.remove('bg-black/80');
+        nav.classList.add('bg-black/50');
+      }
+    });
+  </script>
+
+  <!-- Theme Toggle Script -->
+  <script>
+    // Inicializar tema desde localStorage
+    const themeToggle = document.getElementById('theme-toggle-btn');
+    const htmlElement = document.documentElement;
+    const body = document.body;
+
+    // Cargar tema guardado
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+      body.classList.add('light-mode');
+    }
+
+    // Escucha del toggle
+    themeToggle.addEventListener('click', () => {
+      body.classList.toggle('light-mode');
+      const isLight = body.classList.contains('light-mode');
+      localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    });
+
+    // Sincronizar tema entre pestañas
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'theme') {
+        if (e.newValue === 'light') {
+          body.classList.add('light-mode');
+        } else {
+          body.classList.remove('light-mode');
+        }
+      }
+    });
+  </script>
+</body>
+</html>
